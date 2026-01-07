@@ -1,0 +1,64 @@
+.suggestion-box {
+    position: fixed;
+    bottom: 30px;
+    /* more space from bottom */
+    right: 30px;
+    /* more space from right */
+    width: 360px;
+    /* 🔥 increased width */
+    min-height: 160px;
+    /* 🔥 increased height */
+    background: white;
+    border-left: 8px solid #6b21a8;
+    padding: 24px;
+    /* 🔥 more inner padding */
+    border-radius: 16px;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.25);
+    z-index: 999;
+    animation: slideIn 0.35s ease-in-out;
+}
+
+
+/* Title */
+
+.suggestion-box h4 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    /* 🔥 bigger heading */
+    color: #6b21a8;
+}
+
+
+/* Emotion text */
+
+.suggestion-box .emotion {
+    font-size: 16px;
+    /* 🔥 bigger emotion text */
+    font-weight: 700;
+    color: #6b21a8;
+    margin-bottom: 10px;
+}
+
+
+/* Suggestion message */
+
+.suggestion-box .suggestion {
+    font-size: 15px;
+    /* 🔥 more readable */
+    line-height: 1.6;
+    color: #333;
+}
+
+
+/* Smooth entrance animation */
+
+@keyframes slideIn {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

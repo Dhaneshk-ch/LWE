@@ -1,0 +1,13 @@
+.footer {
+    background: #1c1c1c;
+    color: white;
+    padding: 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    /* 🔥 FIXES */
+    margin-top: 60px;
+    /* space from content */
+    position: relative;
+    /* keeps footer in normal flow */
+    width: 100%;
+}

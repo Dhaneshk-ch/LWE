@@ -1,0 +1,29 @@
+.chat-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #9b6cff;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 50%;
+}
+
+.chatbox {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 300px;
+    background: white;
+    border-radius: 16px;
+}
+
+.chat-header {
+    background: #9b6cff;
+    color: white;
+    padding: 12px;
+}
+
+.chat-body {
+    padding: 15px;
+}
