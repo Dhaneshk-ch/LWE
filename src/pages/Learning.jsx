@@ -29,15 +29,37 @@ export default function Learning() {
 
   const loggedIn = localStorage.getItem("loggedIn");
 
+  const userEmail = localStorage.getItem("userEmail");
+  const progressKey = userEmail ? `moduleProgress_${userEmail}` : "moduleProgress";
+  const emotionHistoryKey = userEmail ? `emotionHistory_${userEmail}` : "emotionHistory";
+  const moduleEmotionHistoryKey = userEmail ? `moduleEmotionHistory_${userEmail}` : "moduleEmotionHistory";
+  const moduleEmotionSummaryKey = userEmail ? `moduleEmotionSummary_${userEmail}` : "moduleEmotionSummary";
+
   // Dominant emotion per module (saved from ModulePage)
-  const emotionSummary =
-    JSON.parse(localStorage.getItem("moduleEmotionSummary")) || {};
+  const emotionSummary = JSON.parse(localStorage.getItem(moduleEmotionSummaryKey)) || {};
 
   // 🔹 Load module completion progress
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("moduleProgress")) || {};
+    const saved = JSON.parse(localStorage.getItem(progressKey)) || {};
     setProgress(saved);
-  }, []);
+  }, [progressKey]);
+
+  // Reset user data (progress + emotions)
+  const resetUserData = () => {
+    if (!userEmail) return;
+
+    const keysToRemove = [
+      `moduleProgress_${userEmail}`,
+      `emotionHistory_${userEmail}`,
+      `moduleEmotionHistory_${userEmail}`,
+      `moduleEmotionSummary_${userEmail}`
+    ];
+
+    keysToRemove.forEach((k) => localStorage.removeItem(k));
+    setProgress({});
+    // force re-render by updating state (emotion/suggestion will naturally update)
+    window.location.reload();
+  };
 
   // 🔹 Emotion detection for overall analytics (Learning page)
   useEffect(() => {
@@ -58,16 +80,11 @@ export default function Learning() {
         setShowSuggestion(true);
 
         // 🔹 SAVE OVERALL EMOTION (FOR OVERALL PIE CHART)
-        const overallHistory =
-          JSON.parse(localStorage.getItem("emotionHistory")) || {};
+        const overallHistory = JSON.parse(localStorage.getItem(emotionHistoryKey)) || {};
 
-        overallHistory[res.emotion] =
-          (overallHistory[res.emotion] || 0) + 1;
+        overallHistory[res.emotion] = (overallHistory[res.emotion] || 0) + 1;
 
-        localStorage.setItem(
-          "emotionHistory",
-          JSON.stringify(overallHistory)
-        );
+        localStorage.setItem(emotionHistoryKey, JSON.stringify(overallHistory));
 
         // 🔹 Hide suggestion after 5 sec
         setTimeout(() => setShowSuggestion(false), 5000);
@@ -82,6 +99,24 @@ export default function Learning() {
   return (
     <div className="learning-page">
       <h2>Learning Modules (10 Weeks)</h2>
+
+      {loggedIn && (
+        <div style={{ marginBottom: 12 }}>
+          <button
+            onClick={resetUserData}
+            style={{
+              padding: "8px 12px",
+              background: "#fee2e2",
+              color: "#b91c1c",
+              border: "none",
+              borderRadius: 8,
+              cursor: "pointer"
+            }}
+          >
+            Reset My Progress & Emotions
+          </button>
+        </div>
+      )}
 
       <div className="module-list">
         {modules.map((m) => {

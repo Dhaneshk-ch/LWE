@@ -83,3 +83,13 @@
     padding: 6px;
     background-color: white;
 }
+
+.login-btn {
+    color: black;
+    background: white;
+    border: none;
+}
+
+.login-btn:hover {
+    color: black;
+}

@@ -27,6 +27,9 @@ export default function Courses() {
 
   const loggedIn = localStorage.getItem("loggedIn");
 
+  const userEmail = localStorage.getItem("userEmail");
+  const emotionHistoryKey = userEmail ? `emotionHistory_${userEmail}` : "emotionHistory";
+
   useEffect(() => {
     if (!loggedIn) return;
 
@@ -44,16 +47,11 @@ export default function Courses() {
         setSuggestion(res.suggestion);
 
         // 🔹 SAVE OVERALL EMOTION (FOR OVERALL PIE CHART)
-        const overallHistory =
-          JSON.parse(localStorage.getItem("emotionHistory")) || {};
+        const overallHistory = JSON.parse(localStorage.getItem(emotionHistoryKey)) || {};
 
-        overallHistory[res.emotion] =
-          (overallHistory[res.emotion] || 0) + 1;
+        overallHistory[res.emotion] = (overallHistory[res.emotion] || 0) + 1;
 
-        localStorage.setItem(
-          "emotionHistory",
-          JSON.stringify(overallHistory)
-        );
+        localStorage.setItem(emotionHistoryKey, JSON.stringify(overallHistory));
 
       } catch (err) {
         console.error("Emotion API error:", err);

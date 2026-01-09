@@ -19,8 +19,11 @@ export default function Analytics() {
 
   useEffect(() => {
     // 🔹 Overall emotions (Learning + Courses)
-    const overall =
-      JSON.parse(localStorage.getItem("emotionHistory")) || {};
+    const userEmail = localStorage.getItem("userEmail");
+    const emotionHistoryKey = userEmail ? `emotionHistory_${userEmail}` : "emotionHistory";
+    const moduleEmotionHistoryKey = userEmail ? `moduleEmotionHistory_${userEmail}` : "moduleEmotionHistory";
+
+    const overall = JSON.parse(localStorage.getItem(emotionHistoryKey)) || {};
 
     if (Object.keys(overall).length > 0) {
       setOverallData({
@@ -42,8 +45,7 @@ export default function Analytics() {
     }
 
     // 🔹 Module-wise emotions (ONLY modules)
-    const module =
-      JSON.parse(localStorage.getItem("moduleEmotionHistory")) || {};
+    const module = JSON.parse(localStorage.getItem(moduleEmotionHistoryKey)) || {};
     setModuleData(module);
   }, []);
 

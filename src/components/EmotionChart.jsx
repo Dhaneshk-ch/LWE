@@ -21,8 +21,10 @@ export default function EmotionChart() {
   const [chartData, setChartData] = useState(null);
 
   useEffect(() => {
-    const history =
-      JSON.parse(localStorage.getItem("emotionHistory")) || {};
+    const userEmail = localStorage.getItem("userEmail");
+    const emotionHistoryKey = userEmail ? `emotionHistory_${userEmail}` : "emotionHistory";
+
+    const history = JSON.parse(localStorage.getItem(emotionHistoryKey)) || {};
 
     const labels = Object.keys(history);
     const values = Object.values(history);

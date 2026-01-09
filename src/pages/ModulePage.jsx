@@ -39,18 +39,16 @@ export default function ModulePage() {
         setSuggestion(res.suggestion);
         setShowSuggestion(true);
 
-        // 🔹 SAVE emotion per module
-        const history =
-          JSON.parse(localStorage.getItem("moduleEmotionHistory")) || {};
+        // 🔹 SAVE emotion per module (per-user)
+        const userEmail = localStorage.getItem("userEmail");
+        const moduleEmotionHistoryKey = userEmail ? `moduleEmotionHistory_${userEmail}` : "moduleEmotionHistory";
+
+        const history = JSON.parse(localStorage.getItem(moduleEmotionHistoryKey)) || {};
 
         history[weekId] = history[weekId] || {};
-        history[weekId][res.emotion] =
-          (history[weekId][res.emotion] || 0) + 1;
+        history[weekId][res.emotion] = (history[weekId][res.emotion] || 0) + 1;
 
-        localStorage.setItem(
-          "moduleEmotionHistory",
-          JSON.stringify(history)
-        );
+        localStorage.setItem(moduleEmotionHistoryKey, JSON.stringify(history));
 
         setTimeout(() => setShowSuggestion(false), 5000);
       } catch (err) {
@@ -62,8 +60,11 @@ export default function ModulePage() {
   }, [weekId]);
 
   // 🔹 Prepare chart data
-  const history =
-    JSON.parse(localStorage.getItem("moduleEmotionHistory")) || {};
+  const userEmail = localStorage.getItem("userEmail");
+  const moduleEmotionHistoryKey = userEmail ? `moduleEmotionHistory_${userEmail}` : "moduleEmotionHistory";
+  const moduleEmotionSummaryKey = userEmail ? `moduleEmotionSummary_${userEmail}` : "moduleEmotionSummary";
+
+  const history = JSON.parse(localStorage.getItem(moduleEmotionHistoryKey)) || {};
   const dataObj = history[weekId] || {};
   const labels = Object.keys(dataObj);
   const values = Object.values(dataObj);
@@ -91,19 +92,17 @@ export default function ModulePage() {
 
   // 🔹 Mark module complete
   const markComplete = () => {
-    const progress =
-      JSON.parse(localStorage.getItem("moduleProgress")) || {};
-    const summary =
-      JSON.parse(localStorage.getItem("moduleEmotionSummary")) || {};
+    const userEmail = localStorage.getItem("userEmail");
+    const progressKey = userEmail ? `moduleProgress_${userEmail}` : "moduleProgress";
+
+    const progress = JSON.parse(localStorage.getItem(progressKey)) || {};
+    const summary = JSON.parse(localStorage.getItem(moduleEmotionSummaryKey)) || {};
 
     progress[weekId] = "completed";
     summary[weekId] = highestEmotion;
 
-    localStorage.setItem("moduleProgress", JSON.stringify(progress));
-    localStorage.setItem(
-      "moduleEmotionSummary",
-      JSON.stringify(summary)
-    );
+    localStorage.setItem(progressKey, JSON.stringify(progress));
+    localStorage.setItem(moduleEmotionSummaryKey, JSON.stringify(summary));
 
     navigate("/learning");
   };
