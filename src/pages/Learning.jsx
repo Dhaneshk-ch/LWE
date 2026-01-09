@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import SuggestionBox from "../components/SuggestionBox";
 import { sendFrameToBackend } from "../services/api";
+import { useNavigate } from "react-router-dom";
 import "../styles/Learning.css";
 
 const modules = [
@@ -19,13 +20,26 @@ const modules = [
 
 export default function Learning() {
   const webcamRef = useRef(null);
+  const navigate = useNavigate();
 
   const [emotion, setEmotion] = useState("");
   const [suggestion, setSuggestion] = useState("");
   const [showSuggestion, setShowSuggestion] = useState(false);
+  const [progress, setProgress] = useState({});
 
   const loggedIn = localStorage.getItem("loggedIn");
 
+  // Dominant emotion per module (saved from ModulePage)
+  const emotionSummary =
+    JSON.parse(localStorage.getItem("moduleEmotionSummary")) || {};
+
+  // 🔹 Load module completion progress
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("moduleProgress")) || {};
+    setProgress(saved);
+  }, []);
+
+  // 🔹 Emotion detection for overall analytics (Learning page)
   useEffect(() => {
     if (!loggedIn) return;
 
@@ -36,22 +50,31 @@ export default function Learning() {
       if (!imageSrc) return;
 
       try {
-        const result = await sendFrameToBackend(imageSrc);
+        const res = await sendFrameToBackend(imageSrc);
 
-        // 🔹 Show suggestion
-        setEmotion(result.emotion);
-        setSuggestion(result.suggestion);
+        // 🔹 Update UI
+        setEmotion(res.emotion);
+        setSuggestion(res.suggestion);
         setShowSuggestion(true);
 
-        // 🔹 Hide after 5 seconds
-        setTimeout(() => {
-          setShowSuggestion(false);
-        }, 5000);
+        // 🔹 SAVE OVERALL EMOTION (FOR OVERALL PIE CHART)
+        const overallHistory =
+          JSON.parse(localStorage.getItem("emotionHistory")) || {};
 
+        overallHistory[res.emotion] =
+          (overallHistory[res.emotion] || 0) + 1;
+
+        localStorage.setItem(
+          "emotionHistory",
+          JSON.stringify(overallHistory)
+        );
+
+        // 🔹 Hide suggestion after 5 sec
+        setTimeout(() => setShowSuggestion(false), 5000);
       } catch (err) {
         console.error("Emotion API error:", err);
       }
-    }, 10000); // 🔥 every 10 sec (5 sec visible + 5 sec hidden)
+    }, 10000); // every 10 seconds
 
     return () => clearInterval(interval);
   }, [loggedIn]);
@@ -60,30 +83,51 @@ export default function Learning() {
     <div className="learning-page">
       <h2>Learning Modules (10 Weeks)</h2>
 
-      {/* MODULE LIST */}
-      <div className="module-grid">
-        {modules.map((m) => (
-          <div key={m.week} className="module-card">
-            <h3>Week {m.week}</h3>
-            <h4>{m.title}</h4>
-            <p>{m.desc}</p>
-            <button>Start Week</button>
-          </div>
-        ))}
+      <div className="module-list">
+        {modules.map((m) => {
+          const isCompleted = progress[m.week] === "completed";
+
+          return (
+            <div key={m.week} className="module-row">
+              <h4>Week {m.week}: {m.title}</h4>
+              <p>{m.desc}</p>
+
+              {/* Progress bar */}
+              <div className="progress-bar">
+                <div
+                  className={`progress-fill ${isCompleted ? "completed" : ""}`}
+                  style={{ width: isCompleted ? "100%" : "0%" }}
+                />
+              </div>
+
+              <div className="module-footer">
+                <span className="status">
+                  {isCompleted
+                    ? `✔ Completed (Mostly ${emotionSummary[m.week] || "—"})`
+                    : "Not Started"}
+                </span>
+
+                <button
+                  onClick={() => navigate(`/learning/week/${m.week}`)}
+                >
+                  {isCompleted ? "View Module" : "Open Module"}
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* HIDDEN WEBCAM */}
+      {/* 🔹 Hidden webcam */}
       {loggedIn && (
         <Webcam
           ref={webcamRef}
           screenshotFormat="image/jpeg"
-          width={200}
-          height={150}
           style={{ position: "absolute", left: "-9999px" }}
         />
       )}
 
-      {/* SUGGESTION BOX */}
+      {/* 🔹 Suggestion box */}
       {loggedIn && showSuggestion && (
         <SuggestionBox emotion={emotion} suggestion={suggestion} />
       )}

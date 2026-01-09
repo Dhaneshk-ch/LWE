@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Webcam from "react-webcam";
 import SuggestionBox from "../components/SuggestionBox";
 import { sendFrameToBackend } from "../services/api";
@@ -19,8 +20,11 @@ const courses = [
 
 export default function Courses() {
   const webcamRef = useRef(null);
+  const navigate = useNavigate();
+
   const [emotion, setEmotion] = useState("");
   const [suggestion, setSuggestion] = useState("");
+
   const loggedIn = localStorage.getItem("loggedIn");
 
   useEffect(() => {
@@ -33,13 +37,28 @@ export default function Courses() {
       if (!imageSrc) return;
 
       try {
-        const result = await sendFrameToBackend(imageSrc);
-        setEmotion(result.emotion);
-        setSuggestion(result.suggestion);
+        const res = await sendFrameToBackend(imageSrc);
+
+        // 🔹 Update UI
+        setEmotion(res.emotion);
+        setSuggestion(res.suggestion);
+
+        // 🔹 SAVE OVERALL EMOTION (FOR OVERALL PIE CHART)
+        const overallHistory =
+          JSON.parse(localStorage.getItem("emotionHistory")) || {};
+
+        overallHistory[res.emotion] =
+          (overallHistory[res.emotion] || 0) + 1;
+
+        localStorage.setItem(
+          "emotionHistory",
+          JSON.stringify(overallHistory)
+        );
+
       } catch (err) {
         console.error("Emotion API error:", err);
       }
-    }, 5000); // 🔥 always updating
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [loggedIn]);
@@ -50,26 +69,36 @@ export default function Courses() {
 
       <div className="courses-grid">
         {courses.map((course, index) => (
-          <div key={index} className="course-card">
+          <div
+            key={index}
+            className="course-card clickable"
+            onClick={() => navigate("/learning")}
+          >
             <h3>{course.title}</h3>
             <p>{course.desc}</p>
-            <button>View Course</button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate("/learning");
+              }}
+            >
+              View Course
+            </button>
           </div>
         ))}
       </div>
 
-      {/* HIDDEN WEBCAM */}
+      {/* 🔹 Hidden webcam */}
       {loggedIn && (
         <Webcam
           ref={webcamRef}
           screenshotFormat="image/jpeg"
-          width={160}
-          height={120}
           style={{ position: "absolute", left: "-9999px" }}
         />
       )}
 
-      {/* 🔹 ALWAYS VISIBLE SUGGESTION BOX */}
+      {/* 🔹 Suggestion box */}
       {loggedIn && emotion && (
         <SuggestionBox emotion={emotion} suggestion={suggestion} />
       )}

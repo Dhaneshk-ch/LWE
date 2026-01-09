@@ -7,6 +7,7 @@ import {
   Tooltip,
   Legend
 } from "chart.js";
+import { useEffect, useState } from "react";
 
 ChartJS.register(
   CategoryScale,
@@ -17,33 +18,41 @@ ChartJS.register(
 );
 
 export default function EmotionChart() {
-  const history = JSON.parse(localStorage.getItem("emotionHistory")) || {};
+  const [chartData, setChartData] = useState(null);
 
-  const labels = Object.keys(history);
-  const values = Object.values(history);
+  useEffect(() => {
+    const history =
+      JSON.parse(localStorage.getItem("emotionHistory")) || {};
 
-  if (labels.length === 0) {
-    return <p>No emotion data available yet.</p>;
+    const labels = Object.keys(history);
+    const values = Object.values(history);
+
+    if (labels.length === 0) return;
+
+    setChartData({
+      labels,
+      datasets: [
+        {
+          label: "Emotion Count",
+          data: values,
+          backgroundColor: "#7c3aed",
+          borderRadius: 8
+        }
+      ]
+    });
+  }, []);
+
+  if (!chartData) {
+    return <p>No emotion data yet</p>;
   }
 
-  const data = {
-    labels,
-    datasets: [
-      {
-        label: "Emotion Count",
-        data: values,
-        backgroundColor: "#7c3aed",
-        borderRadius: 8
-      }
-    ]
-  };
-
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: { display: false }
-    }
-  };
-
-  return <Bar data={data} options={options} />;
+  return (
+    <Bar
+      data={chartData}
+      options={{
+        responsive: true,
+        maintainAspectRatio: false
+      }}
+    />
+  );
 }

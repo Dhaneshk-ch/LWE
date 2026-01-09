@@ -1,0 +1,38 @@
+.module-page {
+    padding: 40px;
+}
+
+.module-text {
+    margin: 15px 0;
+    font-size: 16px;
+}
+
+.module-page ul {
+    margin-left: 20px;
+}
+
+.complete-btn {
+    margin-top: 30px;
+    padding: 10px 20px;
+    background: #22c55e;
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.module-page {
+    padding: 40px;
+}
+
+.complete-btn {
+    margin-top: 25px;
+    padding: 10px 20px;
+    background: #22c55e;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}

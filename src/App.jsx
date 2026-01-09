@@ -8,7 +8,7 @@ import Courses from "./pages/Courses";
 import Learning from "./pages/Learning";
 import Analytics from "./pages/Analytics";
 import Profile from "./components/ProfilePanel";
-
+import ModulePage from "./pages/ModulePage";
 function App() {
   return (
     <>
@@ -21,6 +21,7 @@ function App() {
         <Route path="/learning" element={<Learning />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/profile" element={<Profile />} />
+      <Route path="/learning/week/:weekId" element={<ModulePage />} />
       </Routes>
 
       <Footer />
