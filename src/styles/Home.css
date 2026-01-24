@@ -1,0 +1,196 @@
+.dashboard {
+    display: flex;
+    min-height: 100vh;
+    /* ✅ allows page to grow */
+    background: #f5f3ff;
+    font-family: Arial, sans-serif;
+}
+
+
+/* SIDEBAR */
+
+.sidebar {
+    width: 220px;
+    background: #6b21a8;
+    color: white;
+    padding: 20px;
+}
+
+.logo {
+    margin-bottom: 30px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar li {
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.sidebar li:hover,
+.sidebar .active {
+    background: #7c3aed;
+}
+
+.logout {
+    margin-top: 40px;
+}
+
+
+/* MAIN */
+
+.main {
+    flex: 1;
+    padding: 20px;
+    padding-bottom: 80px;
+    /* ✅ space before footer */
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.topbar input {
+    padding: 8px;
+    width: 250px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.profile {
+    background: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+}
+
+
+/* HERO */
+
+.hero {
+    background: linear-gradient(135deg, #a855f7, #7c3aed);
+    color: white;
+    padding: 30px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+}
+
+.hero button {
+    margin-top: 15px;
+    padding: 10px 18px;
+    background: white;
+    color: #6b21a8;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+
+/* CARDS */
+
+.cards {
+    display: flex;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    width: 200px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+
+/* MENTOR */
+
+.mentor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.mentor-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    padding: 14px 18px;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+}
+
+.mentor-icon {
+    font-size: 26px;
+    margin-right: 12px;
+}
+
+.mentor-card h4 {
+    margin: 0;
+    color: #4c1d95;
+}
+
+.mentor-card p {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: #555;
+}
+
+.mentor-card button {
+    background: #6b21a8;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.mentor-card button:hover {
+    background: #581c87;
+}
+
+
+/* RIGHT PANEL */
+
+.right-panel {
+    width: 250px;
+    background: white;
+    padding: 20px;
+}
+
+.stats div {
+    background: #ede9fe;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+
+/* PREVENT FOOTER OVERLAP */
+
+section {
+    margin-bottom: 40px;
+}
+
+.mentor-list {
+    margin-bottom: 100px;
+    /* ✅ ensures footer never touches mentors */
+}
+
+.clickable {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.clickable:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
