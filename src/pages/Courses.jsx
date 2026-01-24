@@ -56,7 +56,7 @@ export default function Courses() {
       } catch (err) {
         console.error("Emotion API error:", err);
       }
-    }, 3000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [loggedIn]);

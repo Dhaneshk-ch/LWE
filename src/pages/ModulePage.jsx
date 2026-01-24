@@ -54,7 +54,7 @@ export default function ModulePage() {
       } catch (err) {
         console.error(err);
       }
-    }, 3000);
+    }, 6000);
 
     return () => clearInterval(interval);
   }, [weekId]);

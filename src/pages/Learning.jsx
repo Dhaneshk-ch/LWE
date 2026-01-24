@@ -77,7 +77,7 @@ export default function Learning() {
       } catch (err) {
         console.error("Emotion API error:", err);
       }
-    }, 3000); // every 10 seconds
+    }, 5000); // every 10 seconds
 
     return () => clearInterval(interval);
   }, [loggedIn]);
