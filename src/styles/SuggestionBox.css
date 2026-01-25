@@ -1,64 +1,136 @@
+/* ===============================
+   SUGGESTION BOX CONTAINER
+================================ */
+
 .suggestion-box {
-    position: fixed;
-    bottom: 30px;
-    /* more space from bottom */
-    right: 30px;
-    /* more space from right */
-    width: 360px;
-    /* 🔥 increased width */
-    min-height: 160px;
-    /* 🔥 increased height */
-    background: white;
-    border-left: 8px solid #6b21a8;
-    padding: 24px;
-    /* 🔥 more inner padding */
-    border-radius: 16px;
-    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.25);
-    z-index: 999;
-    animation: slideIn 0.35s ease-in-out;
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 360px;               /* 🔥 wider box */
+  min-height: 160px;          /* 🔥 taller box */
+  background: #ffffff;
+  border-left: 8px solid #6b21a8;
+  padding: 24px;              /* 🔥 more padding */
+  border-radius: 16px;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.25);
+  z-index: 999;
+  /* Ensure suggestion box appears above chat UI */
+  z-index: 1100;
+  animation: slideIn 0.35s ease-in-out;
+  font-family: "Segoe UI", sans-serif;
 }
 
 
-/* Title */
+/* ===============================
+   HEADER & TEXT
+================================ */
 
 .suggestion-box h4 {
-    margin: 0 0 10px;
-    font-size: 18px;
-    /* 🔥 bigger heading */
-    color: #6b21a8;
+  margin: 0 0 10px;
+  font-size: 18px;            /* 🔥 bigger title */
+  color: #6b21a8;
 }
-
-
-/* Emotion text */
 
 .suggestion-box .emotion {
-    font-size: 16px;
-    /* 🔥 bigger emotion text */
-    font-weight: 700;
-    color: #6b21a8;
-    margin-bottom: 10px;
+  font-size: 16px;            /* 🔥 stronger emotion text */
+  font-weight: 700;
+  color: #6b21a8;
+  margin-bottom: 10px;
 }
-
-
-/* Suggestion message */
 
 .suggestion-box .suggestion {
-    font-size: 15px;
-    /* 🔥 more readable */
-    line-height: 1.6;
-    color: #333;
+  font-size: 15px;            /* 🔥 readable text */
+  line-height: 1.6;
+  color: #333;
 }
 
 
-/* Smooth entrance animation */
+/* ===============================
+   ACTION BUTTON CONTAINER
+================================ */
+
+.suggestion-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 15px;
+  border-top: 1px solid #f0f0f0;
+}
+
+
+/* ===============================
+   BUTTON BASE STYLE
+================================ */
+
+.action-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+
+/* ===============================
+   PRIMARY BUTTON
+================================ */
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #6b21a8 0%, #667eea 100%);
+  color: #ffffff;
+}
+
+.action-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(107, 33, 168, 0.35);
+}
+
+
+/* ===============================
+   SECONDARY BUTTON
+================================ */
+
+.action-btn.secondary {
+  background: #f5f5f5;
+  color: #6b21a8;
+  border: 1px solid #ddd;
+}
+
+.action-btn.secondary:hover {
+  background: #f0f4ff;
+  border-color: #6b21a8;
+}
+
+
+/* ===============================
+   DISABLED STATE
+================================ */
+
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.action-btn.primary:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+
+/* ===============================
+   ANIMATION
+================================ */
 
 @keyframes slideIn {
-    from {
-        transform: translateY(30px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }

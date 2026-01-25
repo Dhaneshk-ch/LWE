@@ -1,12 +1,17 @@
 def get_suggestion(emotion):
+    emotion = emotion.lower()
+
+    # 🔥 SMART DERIVED EMOTIONS
+    if emotion == "neutral":
+        emotion = "bored"
+
     suggestions = {
-        "Happy": "Great! Try a quiz to test your knowledge.",
-        "Neutral": "Continue learning at your pace.",
-        "Confused": "Here is a simplified explanation for you.",
-        "Sad": "Take a short break or watch a motivational video.",
-        "Frustrated": "Relax for 2 minutes, then try again.",
-        "Bored": "Let’s try an interactive activity!",
-        "Anxiety": "Slow down. Focus on basics and breathe."
+        "happy": "You seem positive! Try a quiz.",
+        "bored": "You seem disengaged. Try interactive games.",
+        "sad": "Let’s review examples slowly.",
+        "angry": "Take a short break and relax.",
+        "fear": "Revisit basics with examples.",
+        "surprise": "Explore more learning content."
     }
 
-    return suggestions.get(emotion, "Keep learning!")
+    return suggestions.get(emotion, "Continue learning at your pace.")

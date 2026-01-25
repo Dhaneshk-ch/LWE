@@ -27,13 +27,20 @@ export default function ModulePage() {
   // 🔹 Emotion detection every 10 sec
   useEffect(() => {
     const interval = setInterval(async () => {
+      console.log("[EmotionInterval] tick");
       if (!webcamRef.current) return;
 
       const img = webcamRef.current.getScreenshot();
+      if (!img) {
+        console.log("[EmotionInterval] getScreenshot returned null");
+        return;
+      }
+      console.log("[EmotionInterval] captured image, sending to backend...");
       if (!img) return;
 
       try {
         const res = await sendFrameToBackend(img);
+        console.log("[EmotionInterval] backend response:", res);
 
         setEmotion(res.emotion);
         setSuggestion(res.suggestion);
@@ -52,9 +59,9 @@ export default function ModulePage() {
 
         setTimeout(() => setShowSuggestion(false), 5000);
       } catch (err) {
-        console.error(err);
+        console.error("[EmotionInterval] error sending frame:", err);
       }
-    }, 10000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [weekId]);

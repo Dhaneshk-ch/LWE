@@ -6,10 +6,17 @@ import numpy as np
 import cv2
 from utils.emotion_mapper import get_suggestion
 from model.emotion_model import predict_emotion
-import random
 from datetime import datetime
+
+# ----------------------------------------
+# APP INITIALIZATION
+# ----------------------------------------
 app = Flask(__name__)
-CORS(app)   # Allow React frontend access
+CORS(app)
+
+# ----------------------------------------
+# DATABASE CONFIG
+# ----------------------------------------
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///emotion_data.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -17,6 +24,7 @@ db.init_app(app)
 
 with app.app_context():
     db.create_all()
+
 # ----------------------------------------
 # TEST API
 # ----------------------------------------
@@ -33,19 +41,17 @@ def login():
     email = data.get("email")
     password = data.get("password")
 
-    # Dummy validation
     if email == "student@lbe.com" and password == "1234":
         return jsonify({
             "success": True,
             "username": "Student",
             "token": "dummy-jwt-token"
         })
-    
+
     return jsonify({"success": False, "message": "Invalid credentials"}), 401
 
-
 # ----------------------------------------
-# EMOTION DETECTION API
+# EMOTION DETECTION API (FINAL)
 # ----------------------------------------
 @app.route("/api/emotion", methods=["POST"])
 def emotion_detection():
@@ -55,50 +61,73 @@ def emotion_detection():
     if not image_base64:
         return jsonify({"error": "No image provided"}), 400
 
-    # Decode image (already in your project)
-    import base64, cv2, numpy as np
-    image_bytes = base64.b64decode(image_base64.split(",")[1])
-    np_arr = np.frombuffer(image_bytes, np.uint8)
-    frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+    try:
+        # Decode base64 image
+        image_bytes = base64.b64decode(image_base64.split(",")[1])
+        np_arr = np.frombuffer(image_bytes, np.uint8)
+        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-    emotion = predict_emotion(frame)
-    suggestion = get_suggestion(emotion)
+        # Predict emotion from model
+        raw_emotion = predict_emotion(frame)
+        print("MODEL OUTPUT:", raw_emotion)
 
-    # 🔥 SAVE TO DATABASE
-    log = EmotionLog(emotion=emotion)
-    db.session.add(log)
-    db.session.commit()
+        # ----------------------------------------
+        # DERIVED EMOTION LOGIC (IMPORTANT)
+        # ----------------------------------------
+        emotion = raw_emotion.lower()
 
-    return jsonify({
-        "emotion": emotion,
-        "suggestion": suggestion
-    })
+        if emotion == "neutral":
+            emotion = "Bored"
+        else:
+            emotion = emotion.capitalize()
 
+        print("FINAL EMOTION SENT TO UI:", emotion)
 
+        # Get suggestion
+        suggestion = get_suggestion(emotion)
+
+        # Save to database
+        log = EmotionLog(
+            emotion=emotion,
+            timestamp=datetime.now()
+        )
+        db.session.add(log)
+        db.session.commit()
+
+        return jsonify({
+            "emotion": emotion,
+            "suggestion": suggestion
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # ----------------------------------------
 # COURSE LIST API
 # ----------------------------------------
 @app.route("/api/courses", methods=["GET"])
 def courses():
-    course_list = [
+    return jsonify([
         {
             "id": 1,
             "title": "Python Basics",
-            "description": "Learn Python from scratch",
+            "description": "Learn Python from scratch"
         },
         {
             "id": 2,
             "title": "Machine Learning",
-            "description": "Introduction to ML concepts",
+            "description": "Introduction to ML concepts"
         },
         {
             "id": 3,
             "title": "Web Development",
-            "description": "HTML, CSS, JavaScript & React",
-        },
-    ]
-    return jsonify(course_list)
+            "description": "HTML, CSS, JavaScript & React"
+        }
+    ])
+
+# ----------------------------------------
+# ANALYTICS API
+# ----------------------------------------
 @app.route("/api/analytics", methods=["GET"])
 def analytics():
     emotions = db.session.query(
@@ -106,37 +135,10 @@ def analytics():
         db.func.count(EmotionLog.emotion)
     ).group_by(EmotionLog.emotion).all()
 
-    result = {emotion: count for emotion, count in emotions}
-    return jsonify(result)
+    return jsonify({emotion: count for emotion, count in emotions})
 
-
+# ----------------------------------------
+# RUN SERVER
+# ----------------------------------------
 if __name__ == "__main__":
     app.run(debug=True)
-
-    
-@app.route("/api/emotion", methods=["POST"])
-def detect_emotion():
-    emotions = ["Happy", "Neutral", "Confused", "Bored", "Frustrated"]
-    emotion = random.choice(emotions)
-
-    suggestions = {
-        "Happy": "Great! Keep learning or try a quiz.",
-        "Neutral": "Stay focused and continue learning.",
-        "Confused": "Try revisiting the topic with a simpler explanation.",
-        "Bored": "Let’s switch to an interactive activity.",
-        "Frustrated": "Take a short break and come back refreshed."
-    }
-
-    # save emotion to DB if you want
-    db.session.add(
-        EmotionLog(
-            emotion=emotion,
-            timestamp=datetime.now()
-        )
-    )
-    db.session.commit()
-
-    return jsonify({
-        "emotion": emotion,
-        "suggestion": suggestions[emotion]
-    })
