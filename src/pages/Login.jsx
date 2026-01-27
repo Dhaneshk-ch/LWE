@@ -11,19 +11,8 @@ export default function Login() {
     e.preventDefault();
 
     if (email && password) {
-      const previousEmail = localStorage.getItem("userEmail");
-      const currentEmail = email;
-
-      // Set login state and email
       localStorage.setItem("loggedIn", "true");
-      localStorage.setItem("userEmail", currentEmail);
-
-      // 🔹 If user switched accounts, mark the session change
-      // (Fresh data automatically loads for new user via email-scoped localStorage keys)
-      if (previousEmail && previousEmail !== currentEmail) {
-        localStorage.setItem("userSessionChanged", "true");
-      }
-
+      localStorage.setItem("userEmail", email);
       navigate("/");
       window.location.reload();
     }

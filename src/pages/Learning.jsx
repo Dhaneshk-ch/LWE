@@ -44,8 +44,22 @@ export default function Learning() {
     setProgress(saved);
   }, [progressKey]);
 
-  // Auto-reset removed: data automatically loads per user based on email-scoped localStorage keys
-  // When user logs in with different email, fresh data automatically loads
+  // Reset user data (progress + emotions)
+  const resetUserData = () => {
+    if (!userEmail) return;
+
+    const keysToRemove = [
+      `moduleProgress_${userEmail}`,
+      `emotionHistory_${userEmail}`,
+      `moduleEmotionHistory_${userEmail}`,
+      `moduleEmotionSummary_${userEmail}`
+    ];
+
+    keysToRemove.forEach((k) => localStorage.removeItem(k));
+    setProgress({});
+    // force re-render by updating state (emotion/suggestion will naturally update)
+    window.location.reload();
+  };
 
   // 🔹 Emotion detection for overall analytics (Learning page)
   useEffect(() => {
@@ -77,7 +91,7 @@ export default function Learning() {
       } catch (err) {
         console.error("Emotion API error:", err);
       }
-    }, 5000); // every 10 seconds
+    }, 5000); // every 5 seconds
 
     return () => clearInterval(interval);
   }, [loggedIn]);
@@ -85,6 +99,24 @@ export default function Learning() {
   return (
     <div className="learning-page">
       <h2>Learning Modules (10 Weeks)</h2>
+
+      {loggedIn && (
+        <div style={{ marginBottom: 12 }}>
+          <button
+            onClick={resetUserData}
+            style={{
+              padding: "8px 12px",
+              background: "#fee2e2",
+              color: "#b91c1c",
+              border: "none",
+              borderRadius: 8,
+              cursor: "pointer"
+            }}
+          >
+            Reset My Progress & Emotions
+          </button>
+        </div>
+      )}
 
       <div className="module-list">
         {modules.map((m) => {
