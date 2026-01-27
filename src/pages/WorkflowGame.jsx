@@ -1,5 +1,6 @@
 import { useState } from "react";
-import "../../styles/WorkflowGame.css";
+import "../styles/WorkflowGame.css";
+
 
 const workflowTopics = {
   "Machine Learning": [
@@ -71,6 +72,7 @@ export default function WorkflowGame() {
   /* ================= TOPIC SELECTION (GRADIENT) ================= */
   if (!selectedTopic) {
     return (
+ 
       <div className="workflow-page">
         <div className="workflow-card">
           <div className="workflow-header">
@@ -94,6 +96,7 @@ export default function WorkflowGame() {
           </div>
         </div>
       </div>
+    
     );
   }
 

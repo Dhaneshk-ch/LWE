@@ -102,19 +102,7 @@ export default function Learning() {
 
       {loggedIn && (
         <div style={{ marginBottom: 12 }}>
-          <button
-            onClick={resetUserData}
-            style={{
-              padding: "8px 12px",
-              background: "#fee2e2",
-              color: "#b91c1c",
-              border: "none",
-              borderRadius: 8,
-              cursor: "pointer"
-            }}
-          >
-            Reset My Progress & Emotions
-          </button>
+          {/* Removed manual reset: progress/emotions are per-user and isolated by email */}
         </div>
       )}
 

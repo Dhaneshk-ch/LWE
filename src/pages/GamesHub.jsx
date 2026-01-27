@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import "../../styles/GamesHub.css";
+import "../styles/GamesHub.css";
+
 
 export default function GamesHub() {
   const navigate = useNavigate();
@@ -26,6 +27,18 @@ export default function GamesHub() {
               onClick={() => navigate("/quiz")}
             >
               Play Quiz
+            </button>
+          </div>
+
+          {/* PUZZLE */}
+          <div className="game-card">
+            <h3>🧩 Puzzle Game</h3>
+            <p>Solve logic puzzles</p>
+            <button
+              className="game-btn"
+              onClick={() => navigate("/puzzle")}
+            >
+              Play Puzzle
             </button>
           </div>
 

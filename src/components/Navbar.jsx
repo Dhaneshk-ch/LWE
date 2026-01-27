@@ -24,6 +24,7 @@ export default function Navbar() {
           <li><Link to="/courses">Courses</Link></li>
           <li><Link to="/learning">Learning</Link></li>
           <li><Link to="/analytics">Analytics</Link></li>
+          <li><Link to="/gameshub">Games</Link></li>
         </ul>
 
         {/* RIGHT SIDE */}
