@@ -24,3 +24,6 @@ __pycache__/
 Thumbs.db
 
 rebase-merge/
+
+# SQLite database
+backend/instance/*.db
