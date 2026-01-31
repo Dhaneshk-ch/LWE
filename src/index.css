@@ -76,3 +76,82 @@ body {
     text-align: center;
     padding: 10px;
 }
+
+.webcam-container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 180px;
+    background: #1f2937;
+    border: 3px solid #7c3aed;
+    border-radius: 12px;
+    overflow: hidden;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.webcam-feed {
+    width: 100%;
+    display: block;
+    transform: scaleX(-1);
+    /* Mirror view */
+}
+
+.emotion-label {
+    background: #7c3aed;
+    color: white;
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 5px;
+    font-weight: bold;
+}
+
+
+/* Container to hold both boxes at bottom-left */
+
+.floating-feedback-container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    align-items: flex-end;
+    /* Keeps them aligned at the bottom */
+    gap: 15px;
+    /* Space between webcam and suggestion box */
+    z-index: 9999;
+}
+
+
+/* Webcam Box Styling */
+
+.webcam-card {
+    width: 200px;
+    background: #1f2937;
+    border: 3px solid #7c3aed;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.webcam-video {
+    width: 100%;
+    display: block;
+    transform: scaleX(-1);
+    /* Mirror effect */
+}
+
+.webcam-overlay {
+    background: #7c3aed;
+    color: white;
+    text-align: center;
+    padding: 4px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+
+/* Ensure SuggestionBox (if it has its own fixed class) doesn't overlap */
+
+
+/* You might need to remove "position: fixed" from your SuggestionBox component 
+   internal CSS if it's interfering with this flex container */

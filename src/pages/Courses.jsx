@@ -4,7 +4,7 @@ import Webcam from "react-webcam";
 import SuggestionBox from "../components/SuggestionBox";
 import { sendFrameToBackend } from "../services/api";
 import "../styles/Courses.css";
-
+import WebcamBox from "../components/WebcamBox";
 const courses = [
   { title: "Emotion-Aware Learning Systems", desc: "Learn how emotions enhance digital learning." },
   { title: "Facial Expression Analysis", desc: "Understand facial muscles and emotions." },
@@ -89,11 +89,13 @@ export default function Courses() {
 
       {/* 🔹 Hidden webcam */}
       {loggedIn && (
-        <Webcam
-          ref={webcamRef}
-          screenshotFormat="image/jpeg"
-          style={{ position: "absolute", left: "-9999px" }}
-        />
+        <WebcamBox
+  onEmotionDetected={(emo, sugg) => {
+    setEmotion(emo);
+    setSuggestion(sugg);
+  }}
+/>
+
       )}
 
       {/* 🔹 Suggestion box */}
@@ -102,4 +104,5 @@ export default function Courses() {
       )}
     </div>
   );
+  
 }
