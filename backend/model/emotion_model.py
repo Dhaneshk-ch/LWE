@@ -1,6 +1,11 @@
 import os
+import sys
 import cv2
 import numpy as np
+
+# Import webcam validation module
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from utils.webcam_validator import validate_webcam_frame, ValidationResult
 
 try:
     import tensorflow as tf
@@ -104,6 +109,36 @@ def preprocess_frame(frame):
     return tensor
 
 
+def preprocess_frame_with_face(face_region):
+    """Convert pre-extracted face region to model input tensor.
+    
+    This is used when face has already been validated and cropped
+    by the webcam validator.
+    
+    Args:
+        face_region (np.ndarray): Grayscale cropped face image
+    
+    Returns:
+        np.ndarray: Model input tensor of shape (1, H, W, 1) dtype float32, or None if invalid
+    """
+    if face_region is None:
+        return None
+    
+    try:
+        # Resize to model input
+        resized = cv2.resize(face_region, (MODEL_INPUT_SIZE[1], MODEL_INPUT_SIZE[0]))
+        
+        # Normalize to [0,1]
+        normalized = resized.astype(np.float32) / 255.0
+        
+        # Expand dims to (1, H, W, 1)
+        tensor = np.expand_dims(normalized, axis=(0, -1))
+        return tensor
+    except Exception as e:
+        print(f"[emotion_model] Error preprocessing face region: {e}")
+        return None
+
+
 def _smooth_and_map(class_idx, confidence):
     """Maintain sliding window of preds and return mapped emotion string."""
     global _pred_history, _last_known
@@ -131,13 +166,42 @@ def _smooth_and_map(class_idx, confidence):
 
 def predict_emotion(frame):
     """Run model inference on an OpenCV BGR frame and return mapped emotion string.
-
+    
+    First performs comprehensive webcam validation:
+    - Checks frame brightness
+    - Detects blur
+    - Validates face detection (exactly 1 face required)
+    
+    If validation fails, returns "Unknown" emotion with guidance message.
+    If validation passes, crops face region and passes to emotion model.
+    
     If the SavedModel isn't available, falls back to a deterministic heuristic (brightness-based).
     """
     global _last_known
-
-    # Preprocess
-    tensor = preprocess_frame(frame)
+    
+    # ================================================================
+    # STEP 1: VALIDATE WEBCAM FRAME QUALITY AND FACE DETECTION
+    # ================================================================
+    validation = validate_webcam_frame(frame)
+    
+    # If validation fails, return Unknown emotion with specific guidance
+    if not validation.is_valid:
+        if validation.validation_type == "brightness":
+            return "Unknown"
+        elif validation.validation_type == "blur":
+            return "Unknown"
+        elif validation.validation_type == "no_face":
+            return "Unknown"
+        elif validation.validation_type == "multiple_faces":
+            return "Multi faces"
+        else:
+            return "Unknown"
+    
+    # ================================================================
+    # STEP 2: PREPROCESS VALIDATED FACE REGION
+    # ================================================================
+    # Use validated face region instead of full frame
+    tensor = preprocess_frame_with_face(validation.face_region)
     if tensor is None:
         return _last_known
 

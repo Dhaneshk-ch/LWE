@@ -5,7 +5,6 @@ import SuggestionBox from "../components/SuggestionBox";
 import { sendFrameToBackend } from "../services/api";
 import "../styles/ModulePage.css";
 
-/*import { Pie } from "react-chartjs-2";*/
 import {
   Chart as ChartJS,
   ArcElement,
@@ -23,102 +22,101 @@ export default function ModulePage() {
   const [emotion, setEmotion] = useState("");
   const [suggestion, setSuggestion] = useState("");
   const [showSuggestion, setShowSuggestion] = useState(false);
+  const [webcamReady, setWebcamReady] = useState(false);
 
-  // 🔹 Emotion detection every 10 sec
+  // 🔹 Emotion detection every 5 sec (STABLE)
   useEffect(() => {
     const interval = setInterval(async () => {
-      console.log("[EmotionInterval] tick");
-      if (!webcamRef.current) return;
+      if (!webcamRef.current || !webcamReady) return;
 
       const img = webcamRef.current.getScreenshot();
-      if (!img) {
-        console.log("[EmotionInterval] getScreenshot returned null");
-        return;
-      }
-      console.log("[EmotionInterval] captured image, sending to backend...");
       if (!img) return;
 
       try {
         const res = await sendFrameToBackend(img);
-        console.log("[EmotionInterval] backend response:", res);
 
         setEmotion(res.emotion);
         setSuggestion(res.suggestion);
         setShowSuggestion(true);
 
-        // 🔹 SAVE emotion per module (per-user)
+        // 🔹 SAVE emotion per module (per user)
         const userEmail = localStorage.getItem("userEmail");
-        const moduleEmotionHistoryKey = userEmail ? `moduleEmotionHistory_${userEmail}` : "moduleEmotionHistory";
+        const moduleEmotionHistoryKey = userEmail
+          ? `moduleEmotionHistory_${userEmail}`
+          : "moduleEmotionHistory";
 
-        const history = JSON.parse(localStorage.getItem(moduleEmotionHistoryKey)) || {};
+        const history =
+          JSON.parse(localStorage.getItem(moduleEmotionHistoryKey)) || {};
 
         history[weekId] = history[weekId] || {};
-        history[weekId][res.emotion] = (history[weekId][res.emotion] || 0) + 1;
+        history[weekId][res.emotion] =
+          (history[weekId][res.emotion] || 0) + 1;
 
-        localStorage.setItem(moduleEmotionHistoryKey, JSON.stringify(history));
+        localStorage.setItem(
+          moduleEmotionHistoryKey,
+          JSON.stringify(history)
+        );
 
         setTimeout(() => setShowSuggestion(false), 5000);
       } catch (err) {
-        console.error("[EmotionInterval] error sending frame:", err);
+        console.error("Emotion API error:", err);
       }
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [weekId]);
+  }, [weekId, webcamReady]);
 
-  // 🔹 Prepare chart data
+  // 🔹 Calculate dominant emotion
   const userEmail = localStorage.getItem("userEmail");
-  const moduleEmotionHistoryKey = userEmail ? `moduleEmotionHistory_${userEmail}` : "moduleEmotionHistory";
-  const moduleEmotionSummaryKey = userEmail ? `moduleEmotionSummary_${userEmail}` : "moduleEmotionSummary";
+  const moduleEmotionHistoryKey = userEmail
+    ? `moduleEmotionHistory_${userEmail}`
+    : "moduleEmotionHistory";
 
-  const history = JSON.parse(localStorage.getItem(moduleEmotionHistoryKey)) || {};
+  const moduleEmotionSummaryKey = userEmail
+    ? `moduleEmotionSummary_${userEmail}`
+    : "moduleEmotionSummary";
+
+  const history =
+    JSON.parse(localStorage.getItem(moduleEmotionHistoryKey)) || {};
   const dataObj = history[weekId] || {};
+
   const labels = Object.keys(dataObj);
   const values = Object.values(dataObj);
 
   const highestEmotion =
-    labels.length
+    labels.length > 0
       ? labels[values.indexOf(Math.max(...values))]
-      : "Not enough data";
+      : "Neutral";
 
-  const pieData = {
-    labels,
-    datasets: [
-      {
-        data: values,
-        backgroundColor: [
-          "#7c3aed",
-          "#22c55e",
-          "#facc15",
-          "#ef4444",
-          "#38bdf8"
-        ]
-      }
-    ]
-  };
-
-  // 🔹 Mark module complete
+  // 🔹 Mark module as complete
   const markComplete = () => {
-    const userEmail = localStorage.getItem("userEmail");
-    const progressKey = userEmail ? `moduleProgress_${userEmail}` : "moduleProgress";
+    const progressKey = userEmail
+      ? `moduleProgress_${userEmail}`
+      : "moduleProgress";
 
-    const progress = JSON.parse(localStorage.getItem(progressKey)) || {};
-    const summary = JSON.parse(localStorage.getItem(moduleEmotionSummaryKey)) || {};
+    const progress =
+      JSON.parse(localStorage.getItem(progressKey)) || {};
+    const summary =
+      JSON.parse(localStorage.getItem(moduleEmotionSummaryKey)) || {};
 
     progress[weekId] = "completed";
     summary[weekId] = highestEmotion;
 
     localStorage.setItem(progressKey, JSON.stringify(progress));
-    localStorage.setItem(moduleEmotionSummaryKey, JSON.stringify(summary));
+    localStorage.setItem(
+      moduleEmotionSummaryKey,
+      JSON.stringify(summary)
+    );
 
     navigate("/learning");
   };
 
   return (
     <div className="module-page">
-         {/* 🔙 BACK BUTTON */}
+
+      {/* 🔙 BACK BUTTON */}
       <button
-        onClick={() => navigate("/")}
+        onClick={() => navigate("/learning")}
         style={{
           marginBottom: "20px",
           padding: "8px 16px",
@@ -129,13 +127,13 @@ export default function ModulePage() {
           cursor: "pointer"
         }}
       >
-        ← Go Back 
+        ← Go Back
       </button>
+
       <h2>Week {weekId} Module</h2>
 
       <p>
-        This module tracks your emotions and adapts suggestions
-        while you learn.
+        This module tracks your emotions and adapts suggestions while you learn.
       </p>
 
       <ul>
@@ -144,20 +142,33 @@ export default function ModulePage() {
         <li>Practice</li>
       </ul>
 
-     
-
       <button className="complete-btn" onClick={markComplete}>
         Mark as Complete
       </button>
 
-      {/* Hidden webcam */}
+      {/* ✅ INVISIBLE BUT ACTIVE WEBCAM (CRITICAL FIX) */}
       <Webcam
         ref={webcamRef}
         screenshotFormat="image/jpeg"
-        style={{ position: "absolute", left: "-9999px" }}
+        onUserMedia={() => setWebcamReady(true)}
+        videoConstraints={{
+          width: 640,
+          height: 480,
+          facingMode: "user"
+        }}
+        style={{
+          position: "fixed",
+          bottom: "10px",
+          left: "10px",
+          width: "140px",
+          height: "105px",
+          opacity: 0,
+          pointerEvents: "none",
+          zIndex: -1
+        }}
       />
 
-      {/* Suggestion box */}
+      {/* 🔹 Suggestion box */}
       {showSuggestion && (
         <SuggestionBox emotion={emotion} suggestion={suggestion} />
       )}

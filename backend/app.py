@@ -67,12 +67,29 @@ def emotion_detection():
         np_arr = np.frombuffer(image_bytes, np.uint8)
         frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-        # Predict emotion from model
+        # Predict emotion from model (with validation)
         raw_emotion = predict_emotion(frame)
         print("MODEL OUTPUT:", raw_emotion)
 
         # ----------------------------------------
-        # DERIVED EMOTION LOGIC (IMPORTANT)
+        # HANDLE VALIDATION FAILURES
+        # ----------------------------------------
+        # If emotion is "Unknown", return validation error without saving to DB
+        if raw_emotion == "Unknown":
+            return jsonify({
+                "emotion": "Unknown",
+                "suggestion": "Camera not clear. Please face the camera properly."
+            })
+        
+        # If emotion is "Multi faces", return without saving to DB
+        if raw_emotion == "Multi faces":
+            return jsonify({
+                "emotion": "Multi faces",
+                "suggestion": "Multiple faces detected. Please ensure only one person is visible."
+            })
+
+        # ----------------------------------------
+        # DERIVED EMOTION LOGIC (ONLY FOR VALID EMOTIONS)
         # ----------------------------------------
         emotion = raw_emotion.lower()
 
@@ -86,7 +103,10 @@ def emotion_detection():
         # Get suggestion
         suggestion = get_suggestion(emotion)
 
-        # Save to database
+        # ========================================
+        # SAVE TO DATABASE (ONLY VALID EMOTIONS)
+        # ========================================
+        # Only save valid emotions, skip "Unknown" and "Multi faces"
         log = EmotionLog(
             emotion=emotion,
             timestamp=datetime.now()
@@ -98,6 +118,9 @@ def emotion_detection():
             "emotion": emotion,
             "suggestion": suggestion
         })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

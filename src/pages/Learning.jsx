@@ -26,17 +26,17 @@ export default function Learning() {
   const [suggestion, setSuggestion] = useState("");
   const [showSuggestion, setShowSuggestion] = useState(false);
   const [progress, setProgress] = useState({});
+  const [webcamReady, setWebcamReady] = useState(false);
 
   const loggedIn = localStorage.getItem("loggedIn");
-
   const userEmail = localStorage.getItem("userEmail");
+
   const progressKey = userEmail ? `moduleProgress_${userEmail}` : "moduleProgress";
   const emotionHistoryKey = userEmail ? `emotionHistory_${userEmail}` : "emotionHistory";
-  const moduleEmotionHistoryKey = userEmail ? `moduleEmotionHistory_${userEmail}` : "moduleEmotionHistory";
   const moduleEmotionSummaryKey = userEmail ? `moduleEmotionSummary_${userEmail}` : "moduleEmotionSummary";
 
-  // Dominant emotion per module (saved from ModulePage)
-  const emotionSummary = JSON.parse(localStorage.getItem(moduleEmotionSummaryKey)) || {};
+  const emotionSummary =
+    JSON.parse(localStorage.getItem(moduleEmotionSummaryKey)) || {};
 
   // 🔹 Load module completion progress
   useEffect(() => {
@@ -44,29 +44,12 @@ export default function Learning() {
     setProgress(saved);
   }, [progressKey]);
 
-  // Reset user data (progress + emotions)
-  const resetUserData = () => {
-    if (!userEmail) return;
-
-    const keysToRemove = [
-      `moduleProgress_${userEmail}`,
-      `emotionHistory_${userEmail}`,
-      `moduleEmotionHistory_${userEmail}`,
-      `moduleEmotionSummary_${userEmail}`
-    ];
-
-    keysToRemove.forEach((k) => localStorage.removeItem(k));
-    setProgress({});
-    // force re-render by updating state (emotion/suggestion will naturally update)
-    window.location.reload();
-  };
-
-  // 🔹 Emotion detection for overall analytics (Learning page)
+  // 🔹 Emotion detection loop
   useEffect(() => {
     if (!loggedIn) return;
 
     const interval = setInterval(async () => {
-      if (!webcamRef.current) return;
+      if (!webcamRef.current || !webcamReady) return;
 
       const imageSrc = webcamRef.current.getScreenshot();
       if (!imageSrc) return;
@@ -74,37 +57,33 @@ export default function Learning() {
       try {
         const res = await sendFrameToBackend(imageSrc);
 
-        // 🔹 Update UI
         setEmotion(res.emotion);
         setSuggestion(res.suggestion);
         setShowSuggestion(true);
 
-        // 🔹 SAVE OVERALL EMOTION (FOR OVERALL PIE CHART)
-        const overallHistory = JSON.parse(localStorage.getItem(emotionHistoryKey)) || {};
+        // Save overall emotion for analytics
+        const history =
+          JSON.parse(localStorage.getItem(emotionHistoryKey)) || {};
 
-        overallHistory[res.emotion] = (overallHistory[res.emotion] || 0) + 1;
+        history[res.emotion] = (history[res.emotion] || 0) + 1;
 
-        localStorage.setItem(emotionHistoryKey, JSON.stringify(overallHistory));
+        localStorage.setItem(
+          emotionHistoryKey,
+          JSON.stringify(history)
+        );
 
-        // 🔹 Hide suggestion after 5 sec
         setTimeout(() => setShowSuggestion(false), 5000);
       } catch (err) {
         console.error("Emotion API error:", err);
       }
-    }, 5000); // every 5 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
-  }, [loggedIn]);
+  }, [loggedIn, webcamReady]);
 
   return (
     <div className="learning-page">
       <h2>Learning Modules (10 Weeks)</h2>
-
-      {loggedIn && (
-        <div style={{ marginBottom: 12 }}>
-          {/* Removed manual reset: progress/emotions are per-user and isolated by email */}
-        </div>
-      )}
 
       <div className="module-list">
         {modules.map((m) => {
@@ -115,7 +94,6 @@ export default function Learning() {
               <h4>Week {m.week}: {m.title}</h4>
               <p>{m.desc}</p>
 
-              {/* Progress bar */}
               <div className="progress-bar">
                 <div
                   className={`progress-fill ${isCompleted ? "completed" : ""}`}
@@ -130,9 +108,7 @@ export default function Learning() {
                     : "Not Started"}
                 </span>
 
-                <button
-                  onClick={() => navigate(`/learning/week/${m.week}`)}
-                >
+                <button onClick={() => navigate(`/learning/week/${m.week}`)}>
                   {isCompleted ? "View Module" : "Open Module"}
                 </button>
               </div>
@@ -141,12 +117,27 @@ export default function Learning() {
         })}
       </div>
 
-      {/* 🔹 Hidden webcam */}
+      {/* ✅ INVISIBLE BUT ACTIVE WEBCAM (FIXED) */}
       {loggedIn && (
         <Webcam
           ref={webcamRef}
           screenshotFormat="image/jpeg"
-          style={{ position: "absolute", left: "-9999px" }}
+          onUserMedia={() => setWebcamReady(true)}
+          videoConstraints={{
+            width: 640,
+            height: 480,
+            facingMode: "user"
+          }}
+          style={{
+            position: "fixed",
+            bottom: "10px",
+            left: "10px",
+            width: "140px",
+            height: "105px",
+            opacity: 0,
+            pointerEvents: "none",
+            zIndex: -1
+          }}
         />
       )}
 
